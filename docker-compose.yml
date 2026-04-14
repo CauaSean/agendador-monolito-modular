@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  agendador:
+    build: ..\agendador
+    container_name: agendador
+    ports:
+      - "9000:9000"
+    environment:
+      - SPRING_DATA_MONGODB_URI=mongodb://mongo:27017/db_agendador
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    restart: no
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: db_agendador
+
+networks:
+  default:
+    driver: bridge
+
+
+
