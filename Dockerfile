@@ -8,4 +8,4 @@ WORKDIR /app
 
 COPY --from=build /app/target/target/*.jar  app.jar
 EXPOSE 9000
-CMD ["java", "-jar", "/app/bff-agendador-tarefas.jar"]
+CMD ["java", "-jar", "/app/tarefas.jar"]
