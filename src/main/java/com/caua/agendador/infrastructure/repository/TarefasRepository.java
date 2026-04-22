@@ -2,14 +2,14 @@ package com.caua.agendador.infrastructure.repository;
 
 import com.caua.agendador.business.enums.StatusNotificacaoEnum;
 import com.caua.agendador.infrastructure.entity.TarefasEntity;
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
-public interface TarefasRepository extends MongoRepository<TarefasEntity, String> {
+public interface TarefasRepository extends JpaRepository<TarefasEntity, String> {
 
     List<TarefasEntity> findBydataEventoBetweenAndStatusNotificacaoEnum(LocalDateTime dataInicial,
                                                                         LocalDateTime dataFinal,

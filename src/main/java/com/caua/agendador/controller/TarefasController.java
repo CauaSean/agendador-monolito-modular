@@ -5,6 +5,7 @@ import com.caua.agendador.business.dto.out.TarefasDTOResponse;
 import com.caua.agendador.business.enums.StatusNotificacaoEnum;
 import com.caua.agendador.business.service.TarefasService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ public class TarefasController {
     @ApiResponse(responseCode =  "200", description = "Tarefa salva com sucesso")
     @ApiResponse(responseCode = "500", description = "Erro de servidor")
     public ResponseEntity<TarefasDTOResponse> gravarTarefas(@RequestBody TarefasDTORequest dto,
+                                                            @Parameter(required = false, description = "Bearer token opcional")
                                                             @RequestHeader(name = "Authorization", required = false) String token) {
         return ResponseEntity.ok(tarefasService.gravarTarefas(dto, token));
     }
@@ -39,6 +41,7 @@ public class TarefasController {
     public ResponseEntity<List<TarefasDTOResponse>> buscaListaDeTarefasPorPeriodo(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dataInicial,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dataFinal,
+            @Parameter(required = false, description = "Bearer token opcional")
             @RequestHeader(name = "Authorization", required = false) String token) {
         return ResponseEntity.ok(tarefasService.buscarTarefasAgendadasPorPeriodo(dataInicial, dataFinal, token));
     }
@@ -47,7 +50,9 @@ public class TarefasController {
     @Operation(summary = "Buscar Lista de Tarefas por Email de Usuário", description = "Busca tarefas cadastradas por usuário")
     @ApiResponse(responseCode =  "200", description = "Tarefas encontradas")
     @ApiResponse(responseCode = "500", description = "Erro de servidor")
-    public ResponseEntity<List<TarefasDTOResponse>> buscaTarefasPorEmail(@RequestHeader(name = "Authorization", required = false) String token) {
+    public ResponseEntity<List<TarefasDTOResponse>> buscaTarefasPorEmail(
+            @Parameter(required = false, description = "Bearer token opcional")
+            @RequestHeader(name = "Authorization", required = false) String token) {
         System.out.println("Token received by BFF: " + token);
         return ResponseEntity.ok(tarefasService.buscarTarefasPorEmail(token));
     }
@@ -57,6 +62,7 @@ public class TarefasController {
     @ApiResponse(responseCode =  "200", description = "Tarefas deletadas")
     @ApiResponse(responseCode = "500", description = "Erro de servidor")
     public ResponseEntity<Void> deletarTarefasPorId(@RequestParam("id") String id,
+                                                    @Parameter(required = false, description = "Bearer token opcional")
                                                     @RequestHeader(name = "Authorization", required = false) String token) {
         tarefasService.deletarTarefasPorId(id, token);
 
@@ -70,7 +76,9 @@ public class TarefasController {
     @ApiResponse(responseCode = "403", description = "Tarefa id não encontrada")
     @ApiResponse(responseCode = "401", description = "Usuário não autorizado")
     public ResponseEntity<TarefasDTOResponse> alteraStatusNotificacao(@RequestParam("status") StatusNotificacaoEnum status,
-                                                                      @RequestParam("id") String id, @RequestHeader(name = "Authorization", required = false) String token) {
+                                                                      @RequestParam("id") String id,
+                                                                      @Parameter(required = false, description = "Bearer token opcional")
+                                                                      @RequestHeader(name = "Authorization", required = false) String token) {
         return ResponseEntity.ok(tarefasService.alteraStatus(status, id, token));
     }
 
@@ -79,7 +87,9 @@ public class TarefasController {
     @ApiResponse(responseCode =  "200", description = "Tarefas alteradas")
     @ApiResponse(responseCode = "500", description = "Erro de servidor")
     public ResponseEntity<TarefasDTOResponse> updateTarefas(@RequestBody TarefasDTORequest dto,
-                                                            @RequestParam("id") String id, @RequestHeader(name = "Authorization", required = false) String token) {
+                                                            @RequestParam("id") String id,
+                                                            @Parameter(required = false, description = "Bearer token opcional")
+                                                            @RequestHeader(name = "Authorization", required = false) String token) {
         return ResponseEntity.ok(tarefasService.updateTarefas(dto, id, token));
     }
 }

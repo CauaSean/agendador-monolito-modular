@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,10 +16,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class CronService {
-
     private final TarefasService tarefasService;
     private final EmailService emailService;
-    private final TarefasDTOResponse tarefasDTOResponse;
 
     @Value("${usuario.email}")
     private String email;
@@ -26,18 +25,28 @@ public class CronService {
     @Value("${usuario.senha}")
     private String senha;
 
+    @Value("${tarefas.service-token:}")
+    private String tarefasServiceToken;
+
     @Scheduled(cron = "${cron.horario}")
     public void buscaTarefasProximaHora(){
         try {
             log.info("Iniciada a busca de tarefas agendadas");
 
-            // Definir período de busca (próxima hora)
+            if (!StringUtils.hasText(tarefasServiceToken)) {
+                log.warn("Execucao do cron ignorada: propriedade tarefas.service-token nao configurada");
+                return;
+            }
+
             LocalDateTime horaFutura = LocalDateTime.now().plusHours(1);
             LocalDateTime horaFuturaMaisCinco = LocalDateTime.now().plusHours(1).plusMinutes(5);
             log.info("Buscando tarefas entre " + horaFutura + " e " + horaFuturaMaisCinco);
 
-            // Buscar tarefas no período
-            List<TarefasDTOResponse> listaTarefas = tarefasService.buscarTarefasAgendadasPorPeriodo(horaFutura, horaFuturaMaisCinco, tarefasDTOResponse.getNomeTarefa());
+            List<TarefasDTOResponse> listaTarefas = tarefasService.buscarTarefasAgendadasPorPeriodo(
+                    horaFutura,
+                    horaFuturaMaisCinco,
+                    tarefasServiceToken
+            );
 
             if (listaTarefas == null || listaTarefas.isEmpty()) {
                 log.info("Nenhuma tarefa encontrada para notificação");
@@ -46,12 +55,17 @@ public class CronService {
 
             log.info("Total de tarefas encontradas: " + listaTarefas.size());
 
-            // Enviar notificações para cada tarefa
             listaTarefas.forEach(tarefa -> {
                 try {
                     emailService.enviarEmail(tarefa);
                     log.info("Email enviado para: " + tarefa.getEmailUsuario());
-                    tarefasService.alteraStatus(StatusNotificacaoEnum.NOTIFICADO, tarefa.getId(), tarefasDTOResponse.getNomeTarefa());
+
+                    tarefasService.alteraStatus(
+                            StatusNotificacaoEnum.NOTIFICADO,
+                            tarefa.getId(),
+                            tarefasServiceToken
+                    );
+
                 } catch (Exception e) {
                     log.error("Erro ao processar tarefa " + tarefa.getId() + ": " + e.getMessage(), e);
                 }

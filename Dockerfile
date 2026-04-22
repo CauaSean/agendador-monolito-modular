@@ -1,11 +1,11 @@
-FROM maven:3.8-openjdk-17 AS BUILD
-WORKDIR /APP
+FROM gradle:8-jdk17-alpine AS build
+WORKDIR /app
 COPY . .
 
-RUN mvn clean install -DskipTest
-FROM openjdk:17-jdk-alpine
+RUN gradle bootJar -x test
+FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
-COPY --from=build /app/target/target/*.jar  app.jar
+COPY --from=build /app/build/libs/*.jar app.jar
 EXPOSE 9000
-CMD ["java", "-jar", "/app/tarefas.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]

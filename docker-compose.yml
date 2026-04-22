@@ -1,28 +1,29 @@
-version: "3.8"
-
 services:
   agendador:
-    build: ..\agendador
+    build: .
     container_name: agendador
     ports:
       - "9000:9000"
     environment:
-      - SPRING_DATA_MONGODB_URI=mongodb://mongo:27017/db_agendador
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db_postgres:5432/db_agendador
+      - SPRING_DATASOURCE_USERNAME=usuario
+      - SPRING_DATASOURCE_PASSWORD=senha
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
     depends_on:
-      - mongo
+      - db_postgres
 
-  mongo:
-    image: mongo:latest
-    container_name: mongo
-    restart: no
+  db_postgres:
+    image: postgres:15-alpine
+    container_name: db_postgres
+    restart: always
     ports:
-      - "27017:27017"
+      - "5432:5432"
     environment:
-      MONGO_INITDB_DATABASE: db_agendador
+      POSTGRES_DB: db_agendador
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+    volumes:
+      - pgdata:/var/lib/postgresql/data
 
-networks:
-  default:
-    driver: bridge
-
-
-
+volumes:
+  pgdata:
